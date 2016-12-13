@@ -89,6 +89,7 @@ function itCatcher() {
     var listUrl = 'https://unsplash.it/list'
     async.waterfall([
         (cb) => {
+            console.log('Solving the picture list...')
             request(listUrl, (err, res, body) => {
                 if (err) {
                     console.log(err)
