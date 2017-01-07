@@ -19,25 +19,25 @@ var port = 80
 //     spider()
 // })
 
-var addPic = async.queue(function(dest, cb) {
-    fs.readFile(list, (err, data) => {
-        var pics = JSON.parse(data)
-        for (var i = 0; i < pics.length; i++) {
-            if (pics[i] == dest) {
-                console.log(dest+' is exist!')
-                cb()
-                return
-            }
-        }
-        pics.push(dest)
-        data = JSON.stringify(pics, null, 4)
-        fs.writeFile(list, data, 'utf8', function(err) {
-            console.log('done! '+dest)
-            cb()
-            return
-        })
-    })
-}, 1)
+// var addPic = async.queue(function(dest, cb) {
+//     fs.readFile(list, (err, data) => {
+//         var pics = JSON.parse(data)
+//         for (var i = 0; i < pics.length; i++) {
+//             if (pics[i] == dest) {
+//                 console.log(dest+' is exist!')
+//                 cb()
+//                 return
+//             }
+//         }
+//         pics.push(dest)
+//         data = JSON.stringify(pics, null, 4)
+//         fs.writeFile(list, data, 'utf8', function(err) {
+//             console.log('done! '+dest)
+//             cb()
+//             return
+//         })
+//     })
+// }, 1)
 
 function spider() {
     console.log('start download at '+Date())
@@ -62,13 +62,13 @@ function spider() {
 function download(url, dest, cb) {
     fs.stat(dest, (err, stat) => {
         if (stat && stat.isFile() && stat.size > 1000) {
-            console.log(dest+' is exist!')
+            console.log('\u001b[33m' + dest + ' is exist!\u001b[39m')
             cb(null, dest)
         } else {
             console.log(dest+' is downloading!')
             try {
                 request(url).pipe(fs.createWriteStream(dest)).on('close', () => {
-                    console.log('done! '+dest)
+                    console.log('\u001b[32mdone!\u001b[39m ' + dest)
                     cb(null, dest)
                 })
             } catch (e) {
@@ -85,25 +85,72 @@ function randPic() {
     return pics[n]
 }
 
-function itCatcher() {
+let itCatcher = function () {
     var listUrl = 'https://unsplash.it/list'
+
+    function download(url, dest, cb) {
+        fs.stat(dest, (err, stat) => {
+            if (stat && stat.isFile() && stat.size > 1000) {
+                this.downloaded += 1
+                console.log('\u001b[33m' + dest + ' is exist!\u001b[39m')
+                cb(null, dest)
+            } else {
+                console.log(dest+' is downloading!')
+                try {
+                    request(url).pipe(fs.createWriteStream(dest)).on('close', () => {
+                        this.downloaded += 1
+                        console.log('\u001b[32mdone!\u001b[39m ' + dest + ' \u001b[34m(' + this.downloaded + '/' + this.picsSum + ')\u001b[39m')
+                        cb(null, dest)
+                    })
+                } catch (e) {
+                    console.log(e.message)
+                    cb(null, dest)
+                }
+            }
+        })
+    }
+
     async.waterfall([
         (cb) => {
             console.log('Solving the picture list...')
-            request(listUrl, (err, res, body) => {
-                if (err) {
-                    console.log(err)
+            let listFile = save_dir + 'list.json'
+            fs.stat(listFile, (err, stat) => {
+                if (Date.now() - stat.mtime > 1000 * 60 * 60 * 24) {
+                    request(listUrl, (err, res, body) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            fs.writeFile(listFile, body, (err) => {
+                                if (err) {
+                                    console.log(err)
+                                } else {
+                                    cb(null, body)
+                                }
+                            })
+                        }
+                    })
                 } else {
-                    var picList = JSON.parse(body)
-                    for (var i = 0; i < picList.length; i++) {
-                        picList[i] = picList[i].post_url + '/download?force=true'
-                    }
-                    cb(null, picList)
+                    fs.readFile(listFile, (err, data) => {
+                        if (err) {
+                            console.log(err)
+                        } else {
+                            cb(null, data)
+                        }
+                    })
                 }
             })
         },
+        (json, cb) => {
+            let picList = JSON.parse(json)
+            for (var i = 0; i < picList.length; i++) {
+                picList[i] = picList[i].post_url + '/download?force=true'
+            }
+            cb(null, picList)
+        },
         (picList, cb) => {
-        console.log('There ar '+picList.length+' pictures.')
+        this.picsSum = picList.length
+        this.downloaded = 0
+        console.log('There ar ' + picsSum + ' pictures in total.')
             async.mapLimit(picList, 5, (src, cb) => {
                 var dest = save_dir+path.dirname(src).split('/')[4]+'.jpg'
                 async.retry({
@@ -124,5 +171,6 @@ function itCatcher() {
         }
     ])
 }
+
 itCatcher()
 // app.listen(port)
