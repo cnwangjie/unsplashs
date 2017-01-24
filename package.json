@@ -1,7 +1,7 @@
 {
-  "name": "splash",
+  "name": "unsplashs",
   "version": "1.0.0",
-  "description": "1",
+  "description": "Use spider to download pictures of unsplash.com daily and provide the same service with unsplash.it",
   "main": "app.js",
   "dependencies": {
     "async": "^2.1.4",
@@ -12,11 +12,11 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node app"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cnwangjie/splash.git"
+    "url": "git+https://github.com/cnwangjie/unsplashs.git"
   },
   "keywords": [
     "unsplash",
@@ -27,7 +27,7 @@
   "author": "cnwangjie",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cnwangjie/splash/issues"
+    "url": "https://github.com/cnwangjie/unsplashs/issues"
   },
-  "homepage": "https://github.com/cnwangjie/splash#readme"
+  "homepage": "https://github.com/cnwangjie/unsplashs#readme"
 }

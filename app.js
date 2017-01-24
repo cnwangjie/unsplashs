@@ -90,12 +90,32 @@ let itCatcher = function () {
 
     function download(url, dest, cb) {
         fs.stat(dest, (err, stat) => {
-            if (stat && stat.isFile() && stat.size > 1000) {
-                this.downloaded += 1
-                console.log('\u001b[33m' + dest + ' is exist!\u001b[39m')
-                cb(null, dest)
+            if (stat && stat.isFile()) {
+                console.log('\u001b[33m' + dest + ' is exist. Following is verifying the integrity\u001b[39m')
+                request({
+                    url: url,
+                    method: 'HEAD'
+                }, (err, res, body) => {
+                    if (res.headers['content-length'] == stat.size) {
+                        console.log('\u001b[32m ' + dest + ' is integral!\u001b[39m')
+                        this.downloaded += 1
+                        cb(null, dest)
+                    } else {
+                        console.log('\u001b[33m' + dest + ' is exist. File on server is ' + res.headers['content-length'] + ' bytes however local is ' + stat.size + ' bytes. Redownloading\u001b[39m')
+                        try {
+                            request(url).pipe(fs.createWriteStream(dest)).on('close', () => {
+                                this.downloaded += 1
+                                console.log('\u001b[32mdone!\u001b[39m ' + dest + ' \u001b[34m(' + this.downloaded + '/' + this.picsSum + ')\u001b[39m')
+                                cb(null, dest)
+                            })
+                        } catch (e) {
+                            console.log(e.message)
+                            cb(null, dest)
+                        }
+                    }
+                })
             } else {
-                console.log(dest+' is downloading!')
+                console.log(dest + ' are being downloaded...')
                 try {
                     request(url).pipe(fs.createWriteStream(dest)).on('close', () => {
                         this.downloaded += 1

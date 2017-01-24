@@ -3,3 +3,7 @@ node_modules/**/*
 
 # app
 pictures.json
+
+# test file
+t0.js
+tmp
