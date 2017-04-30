@@ -6,7 +6,8 @@ var cheerio = require('cheerio')
 var schedule = require('node-schedule')
 var app = require('express')()
 var async = require('async')
-var save_dir = './saved/'
+var save_dir = path.join(__dirname, './saved/')
+var listFile = path.join(save_dir, 'list.json')
 //var list = './pictures.json'
 var port = 80
 
@@ -88,6 +89,10 @@ function randPic() {
 let itCatcher = function () {
     var listUrl = 'https://unsplash.it/list'
 
+    if (!fs.existSync(listFile)) {
+        fs.writeFileSync(listFile, '')
+    }
+
     function download(url, dest, cb) {
         fs.stat(dest, (err, stat) => {
             if (stat && stat.isFile()) {
@@ -133,7 +138,6 @@ let itCatcher = function () {
     async.waterfall([
         (cb) => {
             console.log('Solving the picture list...')
-            let listFile = save_dir + 'list.json'
             fs.stat(listFile, (err, stat) => {
                 if (Date.now() - stat.mtime > 1000 * 60 * 60 * 24) {
                     request(listUrl, (err, res, body) => {
