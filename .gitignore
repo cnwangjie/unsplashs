@@ -7,3 +7,6 @@ pictures.json
 # test file
 t0.js
 tmp
+
+# release file
+dist

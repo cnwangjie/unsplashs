@@ -1,18 +1,27 @@
 unsplashs
 ======
-Use spider to download pictures of unsplash.com daily and provide the same service with unsplash.it
+Use spider to download pictures from unsplash.com.
 
 ### Usage
+
+Clone this repo
 ```shell
 git clone https://github.com/cnwangjie/unsplashs.git
-npm install
-node app
+cd unsplashs
+yarn
+yarn run start
+```
+or use CLI tool
+```shell
+yarn global add unsplashs
+mkdir pictures
+unsplashs pictures
 ```
 
-### Todo
- - [x] Download pictures from unsplash.com
- - [x] Get picture list from unsplash.it
- - [x] Multi-thread downloading
- - [x] Verify integrity
- - [ ] CLI tool
- - [ ] ~~Service like [unsplash-it](https://github.com/DMarby/unsplash-it/blob/master/server.js)~~
+### Feature
+ - Download pictures from unsplash.com
+ - Get picture list from unsplash.it
+ - Multi-thread downloading
+ - Verify integrity
+ - CLI tool
+
